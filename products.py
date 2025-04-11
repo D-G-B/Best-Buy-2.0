@@ -34,6 +34,12 @@ class Product:
             raise ValueError(f"{field_name} cannot be negative")
         return value
 
+    @staticmethod
+    def _validate_int(value: int, field_name: str) -> float:
+        """
+        Validates that a given value is an
+        """
+
     def get_quantity(self) -> int:
         """
         Returns the current quantity of the product.
