@@ -37,8 +37,16 @@ class Product:
     @staticmethod
     def _validate_int(value: int, field_name: str) -> float:
         """
-        Validates that a given value is an
+        Validates that a given value is an integer.
+
+        :param value: The value to validate.
+        :param field_name: Name of the field for error messages.
+        :return: The validated integer value.
+        :raises ValueError: If the value is not an integer.
         """
+        if not isinstance(value, int):
+            raise ValueError(f"{field_name} must be an integer.")
+        return value
 
     def get_quantity(self) -> int:
         """
@@ -108,3 +116,17 @@ class Product:
             self.active = False
 
         return quantity * self.price
+
+class NonStockedProduct(Product):
+    def __init__(self, name: str, price: float ):
+        super().__init__(name, price, quantity=0)
+
+    def set_quantity(self, quantity: int) -> None:
+        raise Exception("Non-stocked products are not physical and cannot have a quantity other than zero")
+
+    def buy(self, quantity: int) -> float:
+        quantity = self._validate_non_negative(quantity, "Quantity to buy")
+        return quantity * self.price
+
+    def show(self) -> str:
+        return f"{self.name}, Price:{self.price}, non-physical product - Not Stocked"
