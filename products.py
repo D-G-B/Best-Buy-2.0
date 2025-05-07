@@ -10,34 +10,52 @@ class Product:
         :param name: Name of the product.
         :param price: Price per unit of the product.
         :param quantity: Available quantity of the product.
-        :raises ValueError: If name is empty or price/quantity is negative.
+        :raises ValueError: If name is empty or price/quantity is invalid.
         """
         if not name:
             raise ValueError("Name cannot be empty")
 
         self.name = name
-        self.price = self._validate_non_negative(price, "Price")
-        self.quantity = self._validate_non_negative(quantity, "Quantity")
+        self.price = self._validate_non_negative_float(price, "Price")
+        self.quantity = self._validate_non_negative_int(quantity, "Quantity")
         self.active = True
 
     @staticmethod
-    def _validate_non_negative(value: float, field_name: str) -> float:
+    def _validate_non_negative_float(value: float, field_name: str) -> float:
         """
-        Validates that a given value is non-negative.
+        Validates that a given float value is non-negative.
 
-        :param value: The value to validate.
+        :param value: The float value to validate.
         :param field_name: Name of the field for error messages.
-        :return: The validated non-negative value.
-        :raises ValueError: If the value is negative.
+        :return: The validated non-negative float value.
+        :raises ValueError: If the value is negative or not a number.
         """
+        if not isinstance(value, (float, int)):
+            raise ValueError(f"{field_name} must be a number.")
         if value < 0:
-            raise ValueError(f"{field_name} cannot be negative")
+            raise ValueError(f"{field_name} cannot be negative.")
+        return float(value)
+
+    @staticmethod
+    def _validate_non_negative_int(value: int, field_name: str) -> int:
+        """
+        Validates that a given int value is non-negative.
+
+        :param value: The int value to validate.
+        :param field_name: Name of the field for error messages.
+        :return: The validated non-negative int value.
+        :raises ValueError: If the value is not a non-negative integer.
+        """
+        if not isinstance(value, int):
+            raise ValueError(f"{field_name} must be an integer.")
+        if value < 0:
+            raise ValueError(f"{field_name} cannot be negative.")
         return value
 
     @staticmethod
-    def _validate_int(value: int, field_name: str) -> float:
+    def _validate_int(value: int, field_name: str) -> int:
         """
-        Validates that a given value is an integer.
+        Validates that a value is an integer.
 
         :param value: The value to validate.
         :param field_name: Name of the field for error messages.
@@ -64,7 +82,7 @@ class Product:
         :param quantity: The new quantity to set.
         :raises ValueError: If the quantity is negative.
         """
-        self.quantity = self._validate_non_negative(quantity, "Quantity")
+        self.quantity = self._validate_non_negative_int(quantity, "Quantity")
         if self.quantity == 0:
             self.active = False
 
@@ -105,7 +123,7 @@ class Product:
         :return: The total cost of the purchase.
         :raises ValueError: If the quantity to buy is negative or exceeds available stock.
         """
-        quantity = self._validate_non_negative(quantity, "Quantity to buy")
+        quantity = self._validate_non_negative_int(quantity, "Quantity to buy")
 
         if quantity > self.quantity:
             raise ValueError("Not enough stock available. Try buying a smaller quantity")
@@ -117,16 +135,82 @@ class Product:
 
         return quantity * self.price
 
+
 class NonStockedProduct(Product):
-    def __init__(self, name: str, price: float ):
+    """
+    A class representing a non-physical product with no inventory (e.g., digital items).
+    """
+
+    def __init__(self, name: str, price: float):
+        """
+        Initializes a NonStockedProduct instance with quantity fixed to 0.
+
+        :param name: Name of the product.
+        :param price: Price of the product.
+        """
         super().__init__(name, price, quantity=0)
 
     def set_quantity(self, quantity: int) -> None:
+        """
+        Raises an error when trying to set quantity for non-stocked products.
+
+        :param quantity: Ignored.
+        :raises Exception: Always, as quantity cannot be changed.
+        """
         raise Exception("Non-stocked products are not physical and cannot have a quantity other than zero")
 
     def buy(self, quantity: int) -> float:
-        quantity = self._validate_non_negative(quantity, "Quantity to buy")
+        """
+        Processes purchase for a non-stocked product (always available).
+
+        :param quantity: The number of units to "buy".
+        :return: The total price.
+        """
+        quantity = self._validate_non_negative_int(quantity, "Quantity to buy")
         return quantity * self.price
 
     def show(self) -> str:
-        return f"{self.name}, Price:{self.price}, non-physical product - Not Stocked"
+        """
+        Returns a string representation for non-stocked products.
+
+        :return: A formatted string indicating it is not stocked.
+        """
+        return f"{self.name}, Price: {self.price}, non-physical product - Not Stocked"
+
+
+class LimitedProduct(Product):
+    """
+    A class representing a product with a maximum purchase limit per transaction.
+    """
+
+    def __init__(self, name: str, price: float, quantity: int, maximum: int):
+        """
+        Initializes a LimitedProduct instance.
+
+        :param name: Name of the product.
+        :param price: Price per unit.
+        :param quantity: Available quantity.
+        :param maximum: Maximum allowed quantity per purchase.
+        """
+        super().__init__(name, price, quantity)
+        self.maximum = self._validate_non_negative_int(maximum, "Maximum quantity")
+
+    def buy(self, quantity: int) -> float:
+        """
+        Processes a purchase, enforcing the maximum per-transaction limit.
+
+        :param quantity: The quantity to buy.
+        :return: The total price.
+        :raises ValueError: If the quantity exceeds the maximum allowed.
+        """
+        if quantity > self.maximum:
+            raise ValueError(f"Cannot purchase more than {self.maximum} units at a time.")
+        return super().buy(quantity)
+
+    def show(self) -> str:
+        """
+        Returns a string representation of the limited product.
+
+        :return: A formatted string with price, quantity, and max purchase.
+        """
+        return f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, Max Purchase: {self.maximum}"

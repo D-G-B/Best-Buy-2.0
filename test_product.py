@@ -1,5 +1,5 @@
 import pytest
-from products import Product
+from products import Product, NonStockedProduct
 
 def test_product_init():
     p = Product("Test", price=100, quantity=10)
@@ -34,3 +34,4 @@ def test_buy_too_much():
     p = Product("Test", price=100, quantity=10)
     with pytest.raises(ValueError):
         p.buy(11)
+
