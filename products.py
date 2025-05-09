@@ -76,7 +76,7 @@ class SecondHalfPrice(Promotion):
 
 class ThirdOneFree(Promotion):
     """
-    A promotion where every third item is free (buy 2 get 1 free).
+    A promotion where every third item is free (buy 2, get 1 free).
     """
     def __init__(self, name: str):
         """
@@ -88,7 +88,7 @@ class ThirdOneFree(Promotion):
 
     def apply_promotion(self, product, quantity: int) -> float:
         """
-        Applies the 'buy 2 get 1 free' promotion.
+        Applies the 'buy 2, get 1 free' promotion.
 
         :param product: The Product instance.
         :param quantity: The quantity being purchased.

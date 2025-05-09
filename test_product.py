@@ -1,5 +1,5 @@
 import pytest
-from products import Product, NonStockedProduct
+from products import Product
 
 def test_product_init():
     p = Product("Test", price=100, quantity=10)
