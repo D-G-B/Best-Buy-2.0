@@ -40,6 +40,7 @@ class PercentDiscount(Promotion):
             raise ValueError("Discount percentage must be a non-negative number.")
         self.percent = percent / 100.0
 
+
     def apply_promotion(self, product, quantity: int) -> float:
         """
         Applies the percentage discount to the total price.
